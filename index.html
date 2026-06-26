@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Centro de Control Operativo - VW</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    body { background-color: #0b0f17; color: #f3f4f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    .vw-card { background-color: #131924; border: 1px solid #1f293d; border-radius: 16px; transition: all 0.3s ease; }
+    .vw-card:hover { border-color: #3b82f6; box-shadow: 0 4px 20px rgba(59, 130, 246, 0.15); }
+    .btn-abrir { background-color: #1e293b; color: #60a5fa; border: 1px solid #334155; padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+    .btn-abrir:hover { background-color: #2563eb; color: #ffffff; }
+    select { background-color: #131924; border: 1px solid #334155; color: #ffffff; padding: 8px 16px; border-radius: 8px; outline: none; cursor: pointer; }
+    select:focus { border-color: #3b82f6; }
+  </style>
+</head>
+<body class="p-4 md:p-8 max-w-7xl mx-auto">
+
+  <!-- Header con Logo de Marca -->
+  <header class="flex items-center justify-between mb-10 pb-4 border-b border-gray-800">
+    <div class="flex items-center gap-4">
+      <div class="w-10 h-10 bg-white text-[#0b0f17] font-black rounded-full flex items-center justify-center text-lg tracking-tighter">VW</div>
+      <h1 class="text-xl font-bold uppercase tracking-wider text-gray-300">Centro de Control Operativo</h1>
+    </div>
+    <div id="loading-status" class="text-sm font-semibold text-blue-400"></div>
+  </header>
+
+  <!-- Bloque de Bienvenida y Filtros -->
+  <main class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+    <div class="lg:col-span-2 flex flex-col justify-center">
+      <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight text-white mb-4 leading-tight">
+        Visión operativa clara <br>para decisiones rápidas.
+      </h2>
+      <p class="text-gray-400 text-base md:text-lg max-w-xl mb-6">
+        Calidad, postventa, seguimiento analítico y flujos por asesor en tiempo real. La idea es leer rápido, detectar desvíos y actuar.
+      </p>
+      
+      <!-- Contenedor de Filtros -->
+      <div class="flex flex-wrap gap-4">
+        <div class="flex flex-col gap-1">
+          <label class="text-xs text-gray-500 uppercase font-bold tracking-wider">Sucursal</label>
+          <select id="sucursal" onchange="fetchMetrics()">
+            <option value="1">Jujuy (1)</option>
+            <option value="11">Tartagal (11)</option>
+          </select>
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="text-xs text-gray-500 uppercase font-bold tracking-wider">Asesor de Servicio</label>
+          <select id="asesor" onchange="fetchMetrics()">
+            <option value="Todos">Todos los Asesores</option>
+            <option value="Juan Perez">Juan Perez</option>
+            <option value="Maria Luz">Maria Luz</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Accesos Directos Laterales -->
+    <div class="flex flex-col gap-3 justify-center">
+      <div class="vw-card p-4 flex items-center justify-between cursor-pointer group" onclick="window.open('https://docs.google.com/spreadsheets/d/1gdogAvJOmZUIoaZq9W1XZwCClzA0632XYR8UbXL5clE')">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-lg bg-blue-950 flex items-center justify-center text-blue-400"><i class="fas fa-chart-line"></i></div>
+          <div><p class="text-xs text-gray-400 uppercase font-bold tracking-wider">Monitoreo</p><p class="text-sm font-semibold text-white">Directo Base Central</p></div>
+        </div>
+        <i class="fas fa-arrow-right text-gray-600 group-hover:text-blue-400 transition-colors"></i>
+      </div>
+      <div class="vw-card p-4 flex items-center justify-between cursor-pointer group">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-lg bg-teal-950 flex items-center justify-center text-teal-400"><i class="fas fa-desktop"></i></div>
+          <div><p class="text-xs text-gray-400 uppercase font-bold tracking-wider">Control</p><p class="text-sm font-semibold text-white">Centralizado de Objetivos</p></div>
+        </div>
+        <i class="fas fa-arrow-right text-gray-600 group-hover:text-teal-400 transition-colors"></i>
+      </div>
+    </div>
+  </main>
+
+  <!-- Sección de Indicadores Dinámicos -->
+  <section class="mb-10">
+    <h3 class="text-xl font-bold tracking-wide text-gray-300 mb-6 uppercase">Áreas Principales</h3>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      
+      <!-- Card: Facturacion -->
+      <div class="vw-card p-6 flex flex-col justify-between h-56">
+        <div class="flex justify-between items-start">
+          <div class="w-12 h-12 rounded-xl bg-blue-950/50 flex items-center justify-center text-blue-400 text-xl"><i class="fas fa-file-invoice-dollar"></i></div>
+          <button class="btn-abrir" onclick="abrirPlanillaEspecifica('facturacion')">ABRIR</button>
+        </div>
+        <div>
+          <h4 class="text-xs text-gray-400 uppercase font-bold tracking-widest">Facturación Gral.</h4>
+          <p id="kpi-facturacion" class="text-3xl font-black text-white mt-1">$0</p>
+        </div>
+        <div class="flex justify-between items-center pt-2 border-t border-gray-800 text-xs text-gray-500 uppercase font-bold">
+          <span>Acceso Directo</span><i class="fas fa-chevron-right text-[10px]"></i>
+        </div>
+      </div>
+
+      <!-- Card: Pasos por Taller -->
+      <div class="vw-card p-6 flex flex-col justify-between h-56">
+        <div class="flex justify-between items-start">
+          <div class="w-12 h-12 rounded-xl bg-purple-950/50 flex items-center justify-center text-purple-400 text-xl"><i class="fas fa-screwdriver-wrench"></i></div>
+          <button class="btn-abrir" onclick="abrirPlanillaEspecifica('ppt')">ABRIR</button>
+        </div>
+        <div>
+          <h4 class="text-xs text-gray-400 uppercase font-bold tracking-widest">Pasos por Taller (PPT)</h4>
+          <p id="kpi-ppt" class="text-3xl font-black text-white mt-1">0.0</p>
+        </div>
+        <div class="flex justify-between items-center pt-2 border-t border-gray-800 text-xs text-gray-500 uppercase font-bold">
+          <span>Acceso Directo</span><i class="fas fa-chevron-right text-[10px]"></i>
+        </div>
+      </div>
+
+      <!-- Card: Ampliaciones -->
+      <div class="vw-card p-6 flex flex-col justify-between h-56">
+        <div class="flex justify-between items-start">
+          <div class="w-12 h-12 rounded-xl bg-green-950/50 flex items-center justify-center text-green-400 text-xl"><i class="fas fa-folder-plus"></i></div>
+          <button class="btn-abrir" onclick="abrirPlanillaEspecifica('ampliaciones')">ABRIR</button>
+        </div>
+        <div>
+          <h4 class="text-xs text-gray-400 uppercase font-bold tracking-widest">Conversión Ampliación</h4>
+          <p id="kpi-ampliaciones" class="text-3xl font-black text-white mt-1">0%</p>
+        </div>
+        <div class="flex justify-between items-center pt-2 border-t border-gray-800 text-xs text-gray-500 uppercase font-bold">
+          <span>Acceso Directo</span><i class="fas fa-chevron-right text-[10px]"></i>
+        </div>
+      </div>
+
+      <!-- Card: Upselling -->
+      <div class="vw-card p-6 flex flex-col justify-between h-56">
+        <div class="flex justify-between items-start">
+          <div class="w-12 h-12 rounded-xl bg-amber-950/50 flex items-center justify-center text-amber-400 text-xl"><i class="fas fa-tags"></i></div>
+          <button class="btn-abrir" onclick="abrirPlanillaEspecifica('upselling')">ABRIR</button>
+        </div>
+        <div>
+          <h4 class="text-xs text-gray-400 uppercase font-bold tracking-widest">Total Upselling</h4>
+          <p id="kpi-upselling" class="text-3xl font-black text-white mt-1">0</p>
+        </div>
+        <div class="flex justify-between items-center pt-2 border-t border-gray-800 text-xs text-gray-500 uppercase font-bold">
+          <span>Acceso Directo</span><i class="fas fa-chevron-right text-[10px]"></i>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- JavaScript Motor de Integración -->
+  <script>
+    // ⚠️ REEMPLAZA ESTA URL CON LA QUE TE DIÓ GOOGLE APPS SCRIPT EN EL PASO 1
+    const GOOGLE_WEB_APP_URL = "HAZ_PEGADO_AQUI_TU_URL_DE_APPS_SCRIPT";
+
+    async function fetchMetrics() {
+      const statusEl = document.getElementById('loading-status');
+      statusEl.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Conectando con Google Sheets...';
+      
+      const suc = document.getElementById('sucursal').value;
+      const ase = document.getElementById('asesor').value;
+      
+      try {
+        const response = await fetch(`${GOOGLE_WEB_APP_URL}?sucursal=${encodeURIComponent(suc)}&asesor=${encodeURIComponent(ase)}`);
+        const kpis = await response.json();
+        
+        // Mapear los datos que vienen del excel a las etiquetas del portal
+        document.getElementById('kpi-facturacion').innerText = kpis['facturacion'] ? '$' + Number(kpis['facturacion']).toLocaleString() : '$0';
+        document.getElementById('kpi-ppt').innerText = kpis['ppt'] || '0.0';
+        document.getElementById('kpi-ampliaciones').innerText = kpis['ampliaciones'] ? (Number(kpis['ampliaciones']) * 100).toFixed(0) + '%' : '0%';
+        document.getElementById('kpi-upselling').innerText = kpis['upselling'] || '0';
+        
+        statusEl.innerHTML = '<span class="text-green-400"><i class="fas fa-check-circle"></i> Sincronizado</span>';
+      } catch (error) {
+        console.error("Error al obtener indicadores:", error);
+        statusEl.innerHTML = '<span class="text-red-400"><i class="fas fa-exclamation-triangle"></i> Error de sincronización</span>';
+      }
+    }
+
+    // Lógica para los accesos directos condicionales
+    function abrirPlanillaEspecifica(modulo) {
+      const asesor = document.getElementById('asesor').value;
+      // Aquí mapeas los enlaces directos a sus respectivos archivos por asesor
+      let urlDestino = "https://docs.google.com/spreadsheets/d/1gdogAvJOmZUIoaZq9W1XZwCClzA0632XYR8UbXL5clE"; // Default central
+      
+      if(asesor === "Juan Perez" && modulo === "facturacion") {
+         urlDestino = "URL_DE_PLANILLA_DE_FACTURACION_DE_JUAN";
+      }
+      
+      window.open(urlDestino, '_blank');
+    }
+
+    // Ejecutar consulta inicial al cargar la página
+    window.onload = fetchMetrics;
+  </script>
+</body>
+</html>
